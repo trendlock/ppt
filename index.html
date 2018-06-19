@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Making MS PPT slide decks from R</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Ross" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Making MS PPT slide decks from R
+## With <code>officer</code>
+### Ross
+### 2018/06/19
+
+---
+
+
+
+
+
+class: inverse
+
+# The `officer` package
+
+&gt;The officer package lets R users manipulate Word (.docx) and PowerPoint (*.pptx) documents. In short, one can add images, tables and text into documents from R. An initial document can be provided; contents, styles and properties of the original document will then be available.
+
+
+```r
+devtools::install_github("davidgohel/officer")
+```
+
+
+
+
+```r
+library(tidyverse)
+library(officer)
+```
+
+.footnote[https://davidgohel.github.io/officer/]
+
+---
+class: inverse
+
+# A starter file
+I've created a `.pptx` file that has a master slide with the ysi logo in the top right hand corner. (Can be modified)
+
+![](imgs/example.png)
+
+---
+
+class: inverse
+
+## Reading the starter file
+
+
+```r
+p  &lt;- read_pptx("docs/ysi.pptx")
+```
+
+## Add Title slide text
+
+
+```r
+p  &lt;- p %&gt;%
+  on_slide(index = 1) %&gt;%
+  ph_with_text(type = "ctrTitle", str = "YSI Presentation") %&gt;%
+  ph_with_text(type = "subTitle", str = "A Template")
+```
+
+.footnote[`ph` stands for *place holder* (so its adding text to a place holder)]
+---
+
+class: inverse
+
+## Add three blank slides
+
+
+```r
+for (n in seq(3)) {
+  p &lt;- p %&gt;% 
+  add_slide(layout = "Title and Content",
+            master = "Office Theme")
+}
+```
+
+## Add some text on slide 2
+
+
+```r
+p &lt;- p %&gt;% 
+  on_slide(index = 2) %&gt;%
+  ph_with_text(type = "title", str = "First title") %&gt;%
+  ph_with_text(type = "body", str = "Some text goes here")
+```
+
+.footnote[Notice the `type` argument, this refers to the part of the slide to adjust]
+
+---
+
+class: inverse
+
+
+## Add some plots
+
+
+```r
+pl1 &lt;- ggplot(data = iris) +
+    geom_point(mapping = aes(Sepal.Length, Petal.Length, col = Species), size = 3)
+
+pl2 &lt;- ggplot(data = mtcars) +
+    geom_point(mapping = aes(mpg, disp, col = as.factor(gear)), size = 3)
+```
+
+# Add them to slides 3 &amp; 4
+
+
+```r
+p &lt;- p  %&gt;%
+  on_slide(index = 3) %&gt;%
+  ph_with_text(type = "title", str = "Third title") %&gt;%
+  ph_with_gg(value = pl1) %&gt;%
+  on_slide(index = 4) %&gt;%
+  ph_with_text(type = "title", str = "Fourth title") %&gt;%
+  ph_with_gg(value = pl2)
+```
+
+---
+
+class: inverse
+
+# Final write the slides to file
+
+
+```r
+print(p, target = "docs/test.pptx")
+```
+
+```
+## [1] "/Users/rosseji/dev/pks/ppt/docs/test.pptx"
+```
+
+---
+
+class: inverse
+
+# Voila
+
+![](imgs/output.png)
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+  }
+});
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

@@ -1,8 +1,8 @@
-R
 
-# devtools::install_github("davidgohel/officer")
 
-options(help_type = "html")
+devtools::install_github("davidgohel/officer")
+
+
 
 library('tidyverse')
 library('officer')
